@@ -12,20 +12,33 @@ class TestController extends Controller
     //
     function reg(Request $request){
 
-        $u=UserModel::first();
-
         $username=$request->input('name');
         $mobile=$request->input('mobile');
         $email=$request->input('email');
 
-        if($u['name']==$username){
-            echo '用户名已存在';die;
+        $u=UserModel::where(['name'=>$username])->first();
+        if($u){
+            $response = [
+                'errno' => 500002,
+                'msg'   => "用户名已被使用"
+            ];
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
         }
-        if($u['mobile']==$mobile){
-            echo '手机号已存在';die;
+        $u=UserModel::where(['mobile'=>$mobile])->first();
+        if($u){
+            $response = [
+                'errno' => 500003,
+                'msg'   => "手机号已被使用"
+            ];
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
         }
-        if($u['email']==$email){
-            echo '邮箱已存在';die;
+        $u=UserModel::where(['email'=>$email])->first();
+        if($u){
+            $response = [
+                'errno' => 500004,
+                'msg'   => "邮箱已被使用"
+            ];
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
         }
 
         $pass1=$request->input('password');
@@ -121,7 +134,7 @@ class TestController extends Controller
         $token=$_SERVER['HTTP_TOKEN'];
         $uid=$_SERVER['HTTP_UID'];
 
-        $key='1905passport'.$uid;
+        $key='1905passport:'.$uid;
         $cache_token=Redis::get($key);
         if($token==$cache_token){
             $data=date('Y-M-d H:i:s');
