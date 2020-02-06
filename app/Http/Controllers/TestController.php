@@ -10,76 +10,79 @@ use Illuminate\Support\Str;
 class TestController extends Controller
 {
     //
-    function reg(Request $request){
+    function reg(Request $request)
+    {
 
-        $username=$request->input('name');
-        $mobile=$request->input('mobile');
-        $email=$request->input('email');
+        $password = $request->input('password');
+//        echo $password;die;
+        $pass2 = $request->input('pass2');
+        if ($password != $pass2) {
+            $response = [
+                'errno' => '40000',
+                'msg' => '两次密码输入不一致'
+            ];
+            die(json_encode($response, JSON_UNESCAPED_UNICODE));
+        }
 
-        $u=UserModel::where(['name'=>$username])->first();
-        if($u){
+//        print_r($request->input());die;
+        $username = $request->input('username');
+        $mobile = $request->input('mobile');
+        $email = $request->input('email');
+
+        $u = UserModel::where(['username' => $username])->first();
+        if ($u) {
             $response = [
                 'errno' => 500002,
-                'msg'   => "用户名已被使用"
+                'msg' => "用户名已被使用"
             ];
-            die(json_encode($response,JSON_UNESCAPED_UNICODE));
+            die(json_encode($response, JSON_UNESCAPED_UNICODE));
         }
-        $u=UserModel::where(['mobile'=>$mobile])->first();
-        if($u){
+        $u = UserModel::where(['mobile' => $mobile])->first();
+        if ($u) {
             $response = [
                 'errno' => 500003,
-                'msg'   => "手机号已被使用"
+                'msg' => "手机号已被使用"
             ];
-            die(json_encode($response,JSON_UNESCAPED_UNICODE));
+            die(json_encode($response, JSON_UNESCAPED_UNICODE));
         }
-        $u=UserModel::where(['email'=>$email])->first();
-        if($u){
+        $u = UserModel::where(['email' => $email])->first();
+        if ($u) {
             $response = [
                 'errno' => 500004,
-                'msg'   => "邮箱已被使用"
+                'msg' => "邮箱已被使用"
             ];
-            die(json_encode($response,JSON_UNESCAPED_UNICODE));
+            die(json_encode($response, JSON_UNESCAPED_UNICODE));
         }
 
-        $pass1=$request->input('password');
-        $pass2=$request->input('pass2');
-        if($pass1!=$pass2){
-            $res=[
-                'errno'=>'40000',
-                'msg'=>'两次密码输入不一致'
-            ];
-            return $res;
-        }
-
-        $password=password_hash($pass1,PASSWORD_BCRYPT);
-        $data=[
-            'name'  =>$username,
-            'password'  =>$password,
-            'mobile'=>$mobile,
-            'email'   =>$email,
-            'last_login'=>time(),
+        $password = password_hash($password, PASSWORD_BCRYPT);
+        $data = [
+            'username' => $username,
+            'password' => $password,
+            'mobile' => $mobile,
+            'email' => $email,
         ];
 
-        $uid=UserModel::insertGetId($data);
-        if($uid){
-            $res=[
-
-                'msg'=>'注册成功'
+        $uid = UserModel::insertGetId($data);
+        if ($uid) {
+            $res = [
+                'errno'=>0,
+                'msg' => '注册成功'
             ];
-        }else{
-            $res=[
-
-                'msg'=>'注册失败'
+        } else {
+            $res = [
+                'errno'=>40003,
+                'msg' => '注册失败'
             ];
         }
-        return $res;
+        die(json_encode($res,JSON_UNESCAPED_UNICODE));
     }
 
+
     function login(Request $request){
-        $name=$request->input('name');
-        $pass=$request->input('pass');
+        $name=$request->input('username');
+        $pass=$request->input('password');
 //        echo $pass;
-        $user=UserModel::where(['name'=>$name])->first();
+        $user=UserModel::where(['username'=>$name])->first();
 
         if(empty($user)){
             $response=[
@@ -134,6 +137,38 @@ class TestController extends Controller
         $token=$_SERVER['HTTP_TOKEN'];
         $uid=$_SERVER['HTTP_UID'];
 
+        $key='1905passport:'.$uid;
+        $cache_token=Redis::get($key);
+        if($token==$cache_token){
+            $data=date('Y-M-d H:i:s');
+            $response=[
+                'errno'=>0,
+                'msg'=>'ok',
+                'data'=>$data
+            ];
+        }else{
+            $response=[
+                'errno'=>40003,
+                'msg'=>'token 过期',
+            ];
+        }
+        return $response;
+    }
+
+    public function auth(){
+        $uid=$_POST['uid'];
+        $token=$_POST['token'];
+
+        if(empty($_SERVER['HTTP_TOKEN'])||empty($_SERVER['HTTP_UID'])){
+            $response=[
+                'errno'=>40003,
+                'msg'=>'token 过期',
+            ];
+            return $response;
+        }
+//        //获取客户端的token
+//        $token=$_SERVER['HTTP_TOKEN'];
+//        $uid=$_SERVER['HTTP_UID'];
         $key='1905passport:'.$uid;
         $cache_token=Redis::get($key);
         if($token==$cache_token){

@@ -18,3 +18,7 @@ Route::get('/', function () {
 Route::post('/test/reg','TestController@reg');
 Route::post('/test/login','TestController@login');
 Route::get('/test/info','TestController@info');
+
+Route::post('/test/auth','TestController@auth');
+
+
