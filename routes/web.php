@@ -24,4 +24,8 @@ Route::post('/test/auth','TestController@auth');
 
 //签名
 Route::get('/test/checksign','TestController@md5test');
+//post签名
+Route::post('/test/checksign2','TestController@md5test2');
+
+Route::get('/test/rsa2','TestController@rsa2');
 
