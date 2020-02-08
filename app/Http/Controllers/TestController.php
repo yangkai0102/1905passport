@@ -226,5 +226,32 @@ class TestController extends Controller
         }
     }
 
- 
+    //公钥验签
+    public function rsa2(){
+//        echo 222;die;
+        echo "<pre>";print_r($_GET);echo "</pre>";
+        $data=$_GET['data'];
+//        die;
+        $pub_key=file_get_contents(storage_path('keys/pub.key'));
+        openssl_public_decrypt($data,$enc_data,$pub_key);
+
+        if($enc_data){
+            echo '验签成功';
+        }else{
+            echo "验证失败";
+        }
+    }
+
+
+    //对称解密
+    public function decrypt(){
+        $data=$_GET['data'];
+        $data=base64_decode($data);
+//        echo $data;
+        $method='AES-256-CBC';
+        $key='yk';
+        $iv='vgdfvfvfrdserrbd';
+        $dec_data=openssl_decrypt($data,$method,$key,OPENSSL_RAW_DATA,$iv);
+        echo "解密：".$dec_data;
+    }
 }

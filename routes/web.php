@@ -29,3 +29,7 @@ Route::post('/test/checksign2','TestController@md5test2');
 
 Route::get('/test/rsa2','TestController@rsa2');
 
+//对称解密
+Route::get('/test/decrypt1','TestController@decrypt');
+
+
