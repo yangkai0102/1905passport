@@ -227,7 +227,7 @@ class TestController extends Controller
     }
 
     //公钥验签
-    public function rsa2(){
+    public function rsa1(){
 //        echo 222;die;
         echo "<pre>";print_r($_GET);echo "</pre>";
         $data=$_GET['data'];
@@ -254,4 +254,22 @@ class TestController extends Controller
         $dec_data=openssl_decrypt($data,$method,$key,OPENSSL_RAW_DATA,$iv);
         echo "解密：".$dec_data;
     }
+
+    //非对称解密
+    public function rsa2(){
+
+        $data=$_GET['data'];
+        
+        //获取的数据base64转码
+        $data=base64_decode($data);
+        //echo $data;die;
+        //获取公钥路径
+        $path=storage_path('keys/pub.key');
+        //获取公钥资源
+        $pub_key=openssl_pkey_get_public("file://".$path);
+        //公钥解密
+        openssl_public_decrypt($data,$dec_data,$pub_key);
+        echo "解密数据：".$dec_data;
+    }
+
 }

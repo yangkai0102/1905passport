@@ -27,9 +27,13 @@ Route::get('/test/checksign','TestController@md5test');
 //post签名
 Route::post('/test/checksign2','TestController@md5test2');
 
-Route::get('/test/rsa2','TestController@rsa2');
+Route::get('/test/rsa1','TestController@rsa1');
 
 //对称解密
 Route::get('/test/decrypt1','TestController@decrypt');
+
+//非对称解密
+Route::get('/test/rsa2','TestController@rsa2');
+
 
 
